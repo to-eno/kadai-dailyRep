@@ -34,17 +34,31 @@ public class EmployeesDestroyServlet extends HttpServlet {
         String _token = (String)request.getParameter("_token");
         if(_token != null && _token.equals(request.getSession().getId())) {
             EntityManager em = DBUtil.createEntityManager();
+            String bef;
+            String aft;
 
             Employee e = em.find(Employee.class, (Integer)(request.getSession().getAttribute("employee_id")));
+            aft = String.valueOf(e.getUpdated_at());
             e.setDelete_flag(1);
             e.setUpdated_at(new Timestamp(System.currentTimeMillis()));
 
-            em.getTransaction().begin();
-            em.getTransaction().commit();
-            em.close();
-            request.getSession().setAttribute("flush", "削除が完了しました。");
+            bef = (String)request.getSession().getAttribute("bef_upd");
+            if (bef.equals(aft) ) {
+                em.getTransaction().begin();
+                em.getTransaction().commit();
+                em.close();
+                request.getSession().setAttribute("flush", "削除が完了しました。");
 
-            response.sendRedirect(request.getContextPath() + "/employees/index");
+                response.sendRedirect(request.getContextPath() + "/employees/index");
+            }else{
+                em.close();
+
+                request.setAttribute("_token", request.getSession().getId());
+                request.setAttribute("employee", e);
+                request.getSession().setAttribute("errors", "対象従業員情報は他ユーザにより更新されています。");
+
+                response.sendRedirect(request.getContextPath() + "/employees/index");
+            }
         }
     }
 

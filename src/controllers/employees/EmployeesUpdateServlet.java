@@ -38,9 +38,11 @@ public class EmployeesUpdateServlet extends HttpServlet {
         String _token = (String)request.getParameter("_token");
         if(_token != null && _token.equals(request.getSession().getId())) {
             EntityManager em = DBUtil.createEntityManager();
+            String bef;
+            String aft;
 
             Employee e = em.find(Employee.class, (Integer)(request.getSession().getAttribute("employee_id")));
-
+            aft =String.valueOf(e.getUpdated_at());
             // 現在の値と異なる社員番号が入力されていたら
             // 重複チェックを行う指定をする
             Boolean code_duplicate_check = true;
@@ -71,24 +73,36 @@ public class EmployeesUpdateServlet extends HttpServlet {
             e.setDelete_flag(0);
 
             List<String> errors = EmployeeValidator.validate(e, code_duplicate_check, password_check_flag);
-            if(errors.size() > 0) {
-                em.close();
 
-                request.setAttribute("_token", request.getSession().getId());
-                request.setAttribute("employee", e);
-                request.setAttribute("errors", errors);
+            bef = (String)request.getSession().getAttribute("bef_upd");
+            if (bef.equals(aft) ) {
+                if(errors.size() > 0) {
+                    em.close();
 
-                RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/views/employees/edit.jsp");
-                rd.forward(request, response);
-            } else {
-                em.getTransaction().begin();
-                em.getTransaction().commit();
-                em.close();
-                request.getSession().setAttribute("flush", "更新が完了しました。");
+                    request.setAttribute("_token", request.getSession().getId());
+                    request.setAttribute("employee", e);
+                    request.setAttribute("errors", errors);
 
-                request.getSession().removeAttribute("employee_id");
+                    RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/views/employees/edit.jsp");
+                    rd.forward(request, response);
+                } else {
+                    em.getTransaction().begin();
+                    em.getTransaction().commit();
+                    em.close();
+                    request.getSession().setAttribute("flush", "更新が完了しました。");
 
-                response.sendRedirect(request.getContextPath() + "/employees/index");
+                    request.getSession().removeAttribute("employee_id");
+
+                    response.sendRedirect(request.getContextPath() + "/employees/index");
+                }
+            }else{
+            em.close();
+
+            request.setAttribute("_token", request.getSession().getId());
+            request.setAttribute("employee", e);
+            request.getSession().setAttribute("errors", "対象従業員情報は他ユーザにより更新されています。");
+
+            response.sendRedirect(request.getContextPath() + "/employees/index");
             }
         }
     }

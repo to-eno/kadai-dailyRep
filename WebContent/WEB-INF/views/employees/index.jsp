@@ -7,6 +7,13 @@
                 <c:out value="${flush}"></c:out>
             </div>
         </c:if>
+        <c:if test="${errors != null}">
+            <div id="flush_error">
+                <c:forEach var="error" items="${errors}">
+                    <c:out value="${error}" /><br />
+                </c:forEach>
+            </div>
+        </c:if>
         <h2>従業員　一覧</h2>
         <table id="employee_list">
             <tbody>

@@ -44,6 +44,7 @@ public class ReportsEditServlet extends HttpServlet {
             request.setAttribute("report", r);
             request.setAttribute("_token", request.getSession().getId());
             request.getSession().setAttribute("report_id", r.getId());
+            request.getSession().setAttribute("bef_upd", String.valueOf(r.getUpdated_at()));
         }
 
         RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/views/reports/edit.jsp");

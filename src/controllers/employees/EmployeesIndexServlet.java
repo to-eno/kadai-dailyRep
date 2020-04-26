@@ -56,7 +56,10 @@ public class EmployeesIndexServlet extends HttpServlet {
             request.setAttribute("flush", request.getSession().getAttribute("flush"));
             request.getSession().removeAttribute("flush");
         }
-
+        if(request.getSession().getAttribute("errors") != null) {
+            request.setAttribute("errors", request.getSession().getAttribute("errors"));
+            request.getSession().removeAttribute("errors");
+        }
         RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/views/employees/index.jsp");
         rd.forward(request, response);
     }
